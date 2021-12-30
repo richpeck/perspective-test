@@ -1,18 +1,21 @@
 ## HUD ##
-## Shows the bottom HUD area ##
+## Shows various pieces of data ##
 
-class HUD < Quad
+class HUD
+
+  # Attrs 
+  attr_accessor :projectiles
     
-  def initialize
-      super(
-          color: 'silver',
-          z: 10,
-          opacity: 1
-      )
+  # Init
+  def initialize projectiles = nil
+    @projectiles = projectiles || []
+    @message = Text.new("Projectiles: #{@projectiles.size}", x: 20, y: 20)
+  end
 
-
-
-
+  # Update
+  def update projectiles: []
+    @projectiles = projectiles
+    @message.text = "Projectiles: #{@projectiles.filter { |p| p.state == true }.size}"
   end
     
 end

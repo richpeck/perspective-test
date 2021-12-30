@@ -3,7 +3,7 @@ require 'ruby2d'
 
 # Objects
 if RUBY_ENGINE != 'mruby'
-    ["player", "map", "projectile"].each do |file|
+    %w(player map projectile hud).each do |file|
         require_relative "lib/objects/#{file}"
     end
 else
@@ -20,6 +20,7 @@ set title: "Perspective Test", background: 'black', width: 850, height: 550
 # Loaded at start so they provide the engine with the means to calculate the entire experience
 @player      = Player.new # player animation in the center of the screen
 @map         = Map.new    # Map interface (creates walls/vertices which can then be traversed with the game code below)
+@hud         = HUD.new    # Display information and options to the user
 @projectiles = []         # Projectiles array (used to define which projectiles the user has fired)
 
 # Constants
@@ -65,10 +66,17 @@ end
 # Game Loop
 # This is the game loop which runs infinitely
 update do 
+
+    # HUD
+    @hud.update projectiles: @projectiles
+
+    # Player
     @player.update_angle if @player.angle_velocity != 0
     @player.update_velocity if @player.velocity != 0
+
+    # Projectiles
+    @projectiles.each { |projectile| projectile.move(VELOCITY) unless !projectile.state } if @projectiles.any? 
     
-    @projectiles.each { |projectile| projectile.move(VELOCITY) unless projectile.state == false } if @projectiles.any? 
 end
 
 # Show Window

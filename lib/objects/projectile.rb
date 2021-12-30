@@ -33,6 +33,15 @@ class Projectile < Circle
 
         self.x += x
         self.y -= y
+
+        # Out of bounds
+        set_state(false) if self.x < 0 || self.x > Window.width || self.y < 0 || self.y > Window.height
+    end
+
+    # Status
+    def set_state toggle = true
+        @state = toggle
+        self.remove if toggle == false
     end
       
   end
