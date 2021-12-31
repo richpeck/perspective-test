@@ -72,7 +72,6 @@ class Player
     # Update global position value for player (used in other classes)
     @x = @dot.x 
     @y = @dot.y
-
   end
   
 end

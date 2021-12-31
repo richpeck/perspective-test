@@ -4,12 +4,12 @@ require 'ruby2d'
 # Objects
 if RUBY_ENGINE != 'mruby'
     %w(player map projectile hud).each do |file|
-        require_relative "lib/objects/#{file}"
+        require_relative "lib/#{file}"
     end
 else
-    require File.expand_path("../lib/objects/player", __FILE__) # require_relative not supported by mruby
-    require File.expand_path("../lib/objects/map", __FILE__) # require_relative not supported by mruby
-    require File.expand_path("../lib/objects/projectile", __FILE__) # require_relative not supported by mruby
+    require File.expand_path("../lib/player", __FILE__) # require_relative not supported by mruby
+    require File.expand_path("../lib/map", __FILE__) # require_relative not supported by mruby
+    require File.expand_path("../lib/projectile", __FILE__) # require_relative not supported by mruby
 end
 
 # Window
