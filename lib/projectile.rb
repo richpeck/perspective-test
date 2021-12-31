@@ -8,12 +8,14 @@ class Projectile < Circle
       
     def initialize(angle, x = 0, y = 0)
         super(
-            x: x, y: y,
-            radius: 2,
-            sectors: 32,
             color: 'white',
             z: 10
         )
+
+        # Required for MRuby
+        self.radius = 2
+        self.x = x
+        self.y = y
 
         # Vars
         @state = true # true/false

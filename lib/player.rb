@@ -32,6 +32,8 @@ class Player
     @angle = 0 # direction (defaults to 0 and is maintained with the line)
     @angle_velocity = 0 # increments at which angle will change (IE += 0.1)
     @velocity = 0 # speed (forward/backwards)
+    @x = @dot.x # x 
+    @y = @dot.y # y
 
   end
 
@@ -50,22 +52,26 @@ class Player
   end
 
   # Update Velocity
-  def update_velocity
+  def update_velocity walls
     radians = @angle * (Math::PI / 180)
 
     x = Math.sin(radians) * @velocity
     y = Math.cos(radians) * @velocity
 
     unless (@dot.x + x) < 0 || (@dot.x + x) >= Window.width
-      @dot.x += x
-      @line.x1 += x
-      @line.x2 += x
+      unless walls.contains? (@dot.x + x), (@dot.y - y)
+        @dot.x += x
+        @line.x1 += x
+        @line.x2 += x
+      end
     end 
 
     unless (@dot.y - y) < 0 || (@dot.y - y) >= Window.height
-      @dot.y -= y
-      @line.y1 -= y   
-      @line.y2 -= y
+      unless walls.contains? (@dot.x + x), (@dot.y - y)
+        @dot.y -= y
+        @line.y1 -= y   
+        @line.y2 -= y
+      end
     end 
 
     # Position

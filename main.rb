@@ -7,9 +7,9 @@ if RUBY_ENGINE != 'mruby'
         require_relative "lib/#{file}"
     end
 else
-    require File.expand_path("../lib/player", __FILE__) # require_relative not supported by mruby
-    require File.expand_path("../lib/map", __FILE__) # require_relative not supported by mruby
-    require File.expand_path("../lib/projectile", __FILE__) # require_relative not supported by mruby
+    %w(player map projectile hud).each do |file|
+        require File.expand_path("../lib/#{file}", __FILE__) # require_relative not supported by mruby (had to hack Ruby2D to get this to populate into the src.rb before compiling -- mruby-require is only for calling specific files)
+    end
 end
 
 # Window
@@ -72,7 +72,7 @@ update do
 
     # Player
     @player.update_angle if @player.angle_velocity != 0
-    @player.update_velocity if @player.velocity != 0
+    @player.update_velocity @map.walls if @player.velocity != 0
 
     # Projectiles
     @projectiles.each { |projectile| projectile.move(VELOCITY) unless !projectile.state } if @projectiles.any? 
