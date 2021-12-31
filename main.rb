@@ -7,9 +7,10 @@ if RUBY_ENGINE != 'mruby'
         require_relative "lib/#{file}"
     end
 else
-    %w(player map projectile hud).each do |file|
-        require File.expand_path("../lib/#{file}", __FILE__) # require_relative not supported by mruby (had to hack Ruby2D to get this to populate into the src.rb before compiling -- mruby-require is only for calling specific files)
-    end
+    require File.expand_path("../lib/player", __FILE__) 
+    require File.expand_path("../lib/map", __FILE__) 
+    require File.expand_path("../lib/projectile", __FILE__) 
+    require File.expand_path("../lib/hud", __FILE__) 
 end
 
 # Window

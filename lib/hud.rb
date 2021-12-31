@@ -15,7 +15,7 @@ class HUD
   # Update
   def update projectiles: []
     @projectiles = projectiles
-    #@message.text = "Projectiles: #{@projectiles.filter { |p| p.state == true }.size} (#{@projectiles.size})"
+    @message.text = "Projectiles: #{@projectiles.filter { |p| p.state == true }.size} (#{@projectiles.size})"
   end
     
 end
