@@ -25,7 +25,7 @@ class Projectile < Circle
     end
 
     # Move 
-    def move(velocity)
+    def move velocity, map
         @velocity = velocity 
 
         radians = @angle * (Math::PI / 180)
@@ -38,6 +38,9 @@ class Projectile < Circle
 
         # Out of bounds
         set_state(false) if self.x < 0 || self.x > Window.width || self.y < 0 || self.y > Window.height
+
+        # Walls 
+        set_state(false) if map.contains?(self.x, self.y)
     end
 
     # Status

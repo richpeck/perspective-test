@@ -69,14 +69,14 @@ end
 update do 
 
     # HUD
-    @hud.update projectiles: @projectiles
+    @hud.update projectiles: @projectiles, angle: @player.angle
 
     # Player
     @player.update_angle if @player.angle_velocity != 0
-    @player.update_velocity @map.walls if @player.velocity != 0
+    @player.update_velocity @map if @player.velocity != 0
 
     # Projectiles
-    @projectiles.each { |projectile| projectile.move(VELOCITY) unless !projectile.state } if @projectiles.any? 
+    @projectiles.each { |projectile| projectile.move(VELOCITY, @map) unless !projectile.state } if @projectiles.any? 
     
 end
 

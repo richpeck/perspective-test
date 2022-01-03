@@ -59,7 +59,7 @@ class Player
     y = Math.cos(radians) * @velocity
 
     unless (@dot.x + x) < 0 || (@dot.x + x) >= Window.width
-      unless walls.contains? (@dot.x + x), (@dot.y - y)
+      unless walls.contains? [@dot.x, @dot.y], [(@dot.x + x), (@dot.y - y)]
         @dot.x += x
         @line.x1 += x
         @line.x2 += x
@@ -67,7 +67,7 @@ class Player
     end 
 
     unless (@dot.y - y) < 0 || (@dot.y - y) >= Window.height
-      unless walls.contains? (@dot.x + x), (@dot.y - y)
+      unless walls.contains? [@dot.x, @dot.y], [(@dot.x + x), (@dot.y - y)]
         @dot.y -= y
         @line.y1 -= y   
         @line.y2 -= y
