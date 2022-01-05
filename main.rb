@@ -3,7 +3,7 @@ require 'ruby2d'
 
 # Objects
 if RUBY_ENGINE != 'mruby'
-    %w(player map projectile hud).each do |file|
+    %w(player map projectile hud camera).each do |file|
         require_relative "lib/#{file}"
     end
 else
@@ -11,23 +11,35 @@ else
     require File.expand_path("../lib/map", __FILE__) 
     require File.expand_path("../lib/projectile", __FILE__) 
     require File.expand_path("../lib/hud", __FILE__) 
+    require File.expand_path("../lib/camera", __FILE__)
 end
-
-# Window
-# Set title, dimensions etc
-set title: "Perspective Test", background: 'black', width: 850, height: 550
-
-# Objects 
-# Loaded at start so they provide the engine with the means to calculate the entire experience
-@player      = Player.new # player animation in the center of the screen
-@map         = Map.new    # Map interface (creates walls/vertices which can then be traversed with the game code below)
-@hud         = HUD.new    # Display information and options to the user
-@projectiles = []         # Projectiles array (used to define which projectiles the user has fired)
 
 # Constants
 # Static values 
 VELOCITY = 10
 ANGLE    = 5
+WIDTH    = 1000
+HEIGHT   = 550
+
+## Bounding Boxes ##
+## These are used to define the bounding box vars -- originally wanted constants but was unable to get the dynamic values ##
+BOUNDING_X = WIDTH / 2 # this should be Window.width but since we're creating a split screen demo, make this half the width of the window  
+BOUNDING_Y = HEIGHT
+
+# Window
+# Set title, dimensions etc
+set title: "Perspective Test", background: 'black', width: WIDTH, height: HEIGHT
+
+# Objects 
+# Loaded at start so they provide the engine with the means to calculate the entire experience
+@player      = Game::Player.new # player animation in the center of the screen
+@map         = Game::Map.new    # Map interface (creates walls/vertices which can then be traversed with the game code below)
+@hud         = Game::HUD.new    # Display information and options to the user
+@projectiles = []               # Projectiles array (used to define which projectiles the user has fired)
+
+# Camera
+# Instantiate the camera 
+@camera = Game::Camera.new @player, @map, @projectiles
 
 # Inputs 
 # Take the user's inputted keystrokes and updates worldview
@@ -49,7 +61,7 @@ end
 on :key_down do |event|
     case event.key 
         when "space"
-            @projectiles.push Projectile.new(@player.angle, @player.x, @player.y)
+            @projectiles.push Game::Projectile.new(@player.angle, @player.x, @player.y)
     end
 end
 
@@ -77,6 +89,9 @@ update do
 
     # Projectiles
     @projectiles.each { |projectile| projectile.move(VELOCITY, @map) unless !projectile.state } if @projectiles.any? 
+
+    # Camera 
+    @camera.update 
     
 end
 
