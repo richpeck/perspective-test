@@ -19,8 +19,8 @@ module Game # Game::Player
       @angle          = 0 # direction (defaults to 0 and is maintained with the line)
       @angle_velocity = 0 # increments at which angle will change (IE += 0.1)
       @velocity       = 0 # speed (forward/backwards)
-      @fov_angle      = 60 # degrees of fov_angle
-      @fov_length     = 115 # length of fov
+      @fov_angle      = 25 # degrees of fov_angle
+      @fov_length     = 500 # length of fov
 
       # Dot (object)
       @dot = Square.new(
@@ -28,8 +28,8 @@ module Game # Game::Player
         color: 'red',
         z: 1
       )
-      @dot.x = (Window.width - @dot.size) / 2
-      @dot.y = (Window.height - @dot.size) / 2
+      @dot.x = (BOUNDING_X - @dot.size) / 2
+      @dot.y = (BOUNDING_Y - @dot.size) - 10
 
       # Line (direction)
       @line = Line.new(
@@ -42,8 +42,8 @@ module Game # Game::Player
       )
 
       # FoV 
-      point_3 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 - (90/2)) % 360)
-      point_4 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 + (90/2)) % 360)
+      point_3 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 - (@fov_angle/2)) % 360)
+      point_4 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 + (@fov_angle/2)) % 360)
 
       @fov = Quad.new(
         x1: @dot.x, y1: @dot.y,
@@ -52,7 +52,7 @@ module Game # Game::Player
         x4: point_4[:x], y4: point_4[:y],
         color: 'aqua',
         z: 10,
-        opacity: 0.15
+        opacity: 0.025
       )
 
       # x,y

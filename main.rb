@@ -21,11 +21,6 @@ ANGLE    = 5
 WIDTH    = 1000
 HEIGHT   = 550
 
-## Bounding Boxes ##
-## These are used to define the bounding box vars -- originally wanted constants but was unable to get the dynamic values ##
-BOUNDING_X = WIDTH / 2 # this should be Window.width but since we're creating a split screen demo, make this half the width of the window  
-BOUNDING_Y = HEIGHT
-
 # Window
 # Set title, dimensions etc
 set title: "Perspective Test", background: 'black', width: WIDTH, height: HEIGHT
