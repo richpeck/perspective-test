@@ -10,8 +10,8 @@ module Game # Game::Camera
 
   ## Points ##
   ## Used to give us a way to call Point.x when defining new items ##
-  Point = Struct.new(:x,:y) do # https://stackoverflow.com/a/57148456/1143732
-    def initialize(*args) # https://stackoverflow.com/a/17061970 (MRUBY - error when compiling for "keyword_init")
+  Point = Struct.new(:x,:y, :z) do # https://stackoverflow.com/a/57148456/1143732
+    def initialize(*args) # https://stackoverflow.com/a/17061970 (MRUBY - error when compiling "keyword_init")
       opts = args.last.is_a?(Hash) ? args.pop : Hash.new
       super(*args)
       opts.each_pair do |k, v|
@@ -145,13 +145,16 @@ module Game # Game::Camera
           (0..3).each do |p|
 
             ## Distance ##
-            ## Get the distance from the player to that point specifically ##
-            a = (wall.send("x#{p + 1}") - @player.x) ** 2
-            b = (wall.send("y#{p + 1}") - @player.y) ** 2
+            ## Get the distance from the player to that point specifically (in 3D) ##
+            a = Point.new(x: wall.send("x#{p + 1}"), y: wall.send("y#{p + 1}") + HEIGHT, z: wall.send("y#{p + 1}"))
+            b = Point.new(x: @player.x, y: @player.y, z: @player.y)
   
             ## Actual Distance ##
             ## This allows us to now use this figure to calculate scale ##
-            distance = Math.sqrt((a + b) * 1.0)
+            dx = (a.x - b.x) ** 2
+            dy = (a.y - b.y) ** 2
+            dz = (a.z - b.z) ** 2
+            distance = Math.sqrt(dx + dy + dz)
 
             ## Scale ##
             scale[p] = (distance/@original_walls[i][p].y) / 0.1 # how far the user is in proportion to the object
@@ -162,12 +165,12 @@ module Game # Game::Camera
           if !scale.empty? && scale.all?(&:negative?)
 
             ## Remove from worldview ##
-            wall.remove
+            #wall.remove
 
           else
 
             ## Add back into worldview ##
-            wall.add
+            #wall.add
 
             ## Update ##
             wall.x1 = central.x + (@original_walls[i][0].x / scale[0]) #top right // blue

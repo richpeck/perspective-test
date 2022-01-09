@@ -19,7 +19,7 @@ module Game # Game::Player
       @angle          = 0 # direction (defaults to 0 and is maintained with the line)
       @angle_velocity = 0 # increments at which angle will change (IE += 0.1)
       @velocity       = 0 # speed (forward/backwards)
-      @fov_angle      = 25 # degrees of fov_angle
+      @fov_angle      = 60 # degrees of fov_angle
       @fov_length     = 500 # length of fov
 
       # Dot (object)
@@ -56,8 +56,8 @@ module Game # Game::Player
       )
 
       # x,y
-      @x = @dot.x # x 
-      @y = @dot.y # y
+      @x = @dot.x.to_f.round(2) # x 
+      @y = @dot.y.to_f.round(2) # y
 
     end
 
@@ -121,8 +121,8 @@ module Game # Game::Player
 
       # Position
       # Update global position value for player (used in other classes)
-      @x = @dot.x 
-      @y = @dot.y
+      @x = @dot.x.round(2)
+      @y = @dot.y.round(2)
     end
 
     private 

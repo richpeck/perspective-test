@@ -27,10 +27,10 @@ set title: "Perspective Test", background: 'black', width: WIDTH, height: HEIGHT
 
 # Objects 
 # Loaded at start so they provide the engine with the means to calculate the entire experience
-@player      = Game::Player.new # player animation in the center of the screen
-@map         = Game::Map.new    # Map interface (creates walls/vertices which can then be traversed with the game code below)
-@hud         = Game::HUD.new    # Display information and options to the user
-@projectiles = []               # Projectiles array (used to define which projectiles the user has fired)
+@player      = Game::Player.new      # player animation in the center of the screen
+@map         = Game::Map.new         # Map interface (creates walls/vertices which can then be traversed with the game code below)
+@projectiles = []                    # Projectiles array (used to define which projectiles the user has fired)
+@hud         = Game::HUD.new @projectiles, @player # Display information and options to the user
 
 # Camera
 # Instantiate the camera 
@@ -76,7 +76,7 @@ end
 update do 
 
     # HUD
-    @hud.update projectiles: @projectiles, angle: @player.angle
+    @hud.update projectiles: @projectiles, player: @player
 
     # Player
     @player.update_angle if @player.angle_velocity != 0
