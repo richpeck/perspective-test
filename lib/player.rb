@@ -93,7 +93,7 @@ module Game # Game::Player
       x = Math.sin(radians) * @velocity
       y = Math.cos(radians) * @velocity
 
-      unless (@dot.x + x) < 0 || (@dot.x + x) >= BOUNDING_X
+      unless (@dot.x + x) <= 0 || (@dot.x + x) >= BOUNDING_X
         unless walls.contains? [@dot.x, @dot.y], [(@dot.x + x), (@dot.y - y)]
           @dot.x += x
           @line.x1 += x
@@ -106,7 +106,7 @@ module Game # Game::Player
         end
       end 
 
-      unless (@dot.y - y) < 0 || (@dot.y - y) >= BOUNDING_Y
+      unless (@dot.y - y) <= 0 || (@dot.y - y) >= BOUNDING_Y
         unless walls.contains? [@dot.x, @dot.y], [(@dot.x + x), (@dot.y - y)]
           @dot.y -= y
           @line.y1 -= y   

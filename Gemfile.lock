@@ -1,0 +1,20 @@
+GIT
+  remote: https://github.com/richpeck/ruby2d.git
+  revision: abc08714b8fcb35243b63b14f3579bcac4a8b320
+  branch: windows
+  submodules: true
+  specs:
+    ruby2d (0.11.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  x64-mingw32
+
+DEPENDENCIES
+  ruby2d!
+
+BUNDLED WITH
+   2.2.22
