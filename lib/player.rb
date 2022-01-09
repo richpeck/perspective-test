@@ -64,20 +64,17 @@ module Game # Game::Player
     # Update Angle 
     def update_angle 
       @angle = (@angle + @angle_velocity) % 360
+      
+      response = update_radians({ x: @line.x2, y: @line.y2 }, { x: @line.x1, y: @line.y1 })
 
-      radians = update_radians({ x: @line.x2, y: @line.y2 }, { x: @line.x1, y: @line.y1 })
-
-      @line.x2 = radians[:x]
-      @line.y2 = radians[:y]
+      @line.x2 = response[:x]
+      @line.y2 = response[:y]
 
       update_fov # update the field of view to match
     end
 
     # Update FoV
     def update_fov 
-      radians = @angle * (Math::PI / 180)
-
-      # Angles 
       [3,4].each do |i|
         angles = update_radians({ x: @fov.send("x#{i}"), y: @fov.send("y#{i}") }, { x: @fov.x1, y: @fov.y1 })
 
@@ -127,19 +124,50 @@ module Game # Game::Player
 
     private 
 
+    # Rotation Matrix
+    # Method to return the rotation matrix (means we don't have to keep defining it each time)
+    def rotation_matrix radians
+      [
+        [Math.cos(radians), -(Math.sin(radians))],
+        [Math.sin(radians), Math.cos(radians)]
+      ]
+    end
+
+    # Matrix Multiply
+    # Code I found to multiply matrices together (used for rotation calculation code below)
+    def multiply_matrix(m1, m2)
+      result = Array.new( m1.length ) { Array.new( m2[0].length ) {0} }
+
+      for i in 0..result.length - 1
+          for j in 0..result[0].length - 1
+              for k in 0..m1[0].length - 1
+                  result[i][j] += m1[i][k] * m2[k][j]
+              end
+          end
+      end
+  
+      return result
+    end
+
     # Radians 
     # Functionality to update SINGLE set of points (p1[:x],p1[:y]) against static point (p2[:x],p2[:y])
     def update_radians p1, p2, angle_velocity = @angle_velocity
-      radians  = angle_velocity * (Math::PI / 180)
+
+      # Vars
+      radians  = -(angle_velocity * (Math::PI / 180)) # this needs to be fixed (should NOT be negative)
       response = {}
 
-      x2 = p1[:x] - p2[:x]
-      y2 = p1[:y] - p2[:y]
-      cos = Math.cos(radians)
-      sin = Math.sin(radians)
+      # Normalize lengths
+      x2 = p1[:x] - p2[:x] # normalize x (IE take away the original line to provide the new position from 0,0)
+      y2 = p1[:y] - p2[:y] # normalize y (IE take away the original line to provide the new position from 0,0)
+
+      # Matrix
+      points = multiply_matrix([[x2, y2]], rotation_matrix(radians)) #-> should provide array with two values
+      points.flatten!
       
-      response[:x] = ((x2 * cos) - (y2 * sin)) + p2[:x]
-      response[:y] = ((x2 * sin) + (y2 * cos)) + p2[:y]
+      # Response
+      response[:x] = points[0] + p2[:x] # add the original line back so we have the non-normalized co-ordinates
+      response[:y] = points[1] + p2[:y] # add the original line back so we have the non-normalized co-ordinates 
 
       return response
     end

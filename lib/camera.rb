@@ -76,8 +76,8 @@ module Game # Game::Camera
       if @map.walls.any?
 
         line = Line.new(
-          x1: 100, y1: (200 + 125),
-          x2: (100 + 125), y2: (200 + 125),
+          x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
+          x2: (BOUNDING_X / 2), y2: (300 + 125),
           size: 125,
           color: 'white',
           z: 10

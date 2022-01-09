@@ -9,11 +9,13 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    matrix (0.4.2)
 
 PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
+  matrix (~> 0.4.2)
   ruby2d!
 
 BUNDLED WITH
