@@ -138,49 +138,49 @@ module Game # Game::Camera
           ## Central ##
           central = Point.new(x: (@original_walls[i][0].x + @original_walls[i][1].x) / 2, y: (@original_walls[i][0].y + @original_walls[i][2].y) / 2)
 
-                        ## Scale ##
-                        scale = ((@original_walls[i][0].y - @player.y)/@original_walls[i][0].y) / 0.1 # percentage of how far the user is in proportion to the object
+          ## Scale ##
+          scale = []
 
-          ## Prevent inversion ##
-          if scale.positive?
+          ## Points ##
+          (0..3).each do |p|
 
-            ## Hide from worldview (behind us)
+            ## Distance ##
+            ## Get the distance from the player to that point specifically ##
+            a = (wall.send("x#{p + 1}") - @player.x) ** 2
+            b = (wall.send("y#{p + 1}") - @player.y) ** 2
+  
+            ## Actual Distance ##
+            ## This allows us to now use this figure to calculate scale ##
+            distance = Math.sqrt((a + b) * 1.0)
+
+            ## Scale ##
+            scale[p] = (distance/@original_walls[i][p].y) / 0.1 # how far the user is in proportion to the object
+
+          end
+
+          ## Wall is behind ##
+          if !scale.empty? && scale.all?(&:negative?)
+
+            ## Remove from worldview ##
             wall.remove
 
           else
 
-            ## Show in worldview ##
-            wall.add 
+            ## Add back into worldview ##
+            wall.add
 
-            ## Points ##
-            [1,2,3,4].each do |p|
-
-              ## Distance ##
-              ## Get the distance from the player to that point specifically ##
-              a = (wall.send("x#{p}") - @player.x) ** 2
-              b = (wall.send("y#{p}") - @player.y) ** 2
-    
-              ## Actual Distance ##
-              ## This allows us to now use this figure to calculate scale ##
-              distance = Math.sqrt((a + b) * 1.0)
-
-              ## Scale ##
-              #scale = ((@original_walls[i][0].y - @player.y)/@original_walls[i][0].y) / 0.1 # percentage of how far the user is in proportion to the object
-
-            end
-
-            ## Points ##
-            wall.x4 = central.x - (@original_walls[i][1].x / scale) #top left // white
-            wall.y4 = central.y + (@original_walls[i][1].y / scale)
-
-            wall.x1 = central.x + (@original_walls[i][0].x / scale) #top right // blue
-            wall.y1 = central.y + (@original_walls[i][0].y / scale)
-
-            wall.x3 = central.x - (@original_walls[i][3].x / scale) #bottom left // green
-            wall.y3 = central.y - (@original_walls[i][3].y / scale)
-
-            wall.x2 = central.x + (@original_walls[i][2].x / scale) #bottom right // yellow
-            wall.y2 = central.y - (@original_walls[i][2].y / scale)
+            ## Update ##
+            wall.x1 = central.x + (@original_walls[i][0].x / scale[0]) #top right // blue
+            wall.y1 = central.y + (@original_walls[i][0].y / scale[0])
+          
+            wall.x2 = central.x + (@original_walls[i][2].x / scale[1]) #bottom left // yellow
+            wall.y2 = central.y - (@original_walls[i][2].y / scale[1])
+          
+            wall.x3 = central.x - (@original_walls[i][3].x / scale[2]) #bottom right // green
+            wall.y3 = central.y - (@original_walls[i][3].y / scale[2])
+          
+            wall.x4 = central.x - (@original_walls[i][1].x / scale[3]) #top left // white
+            wall.y4 = central.y + (@original_walls[i][1].y / scale[3])
 
           end
 

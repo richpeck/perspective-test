@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/richpeck/ruby2d.git
-  revision: abc08714b8fcb35243b63b14f3579bcac4a8b320
+  revision: fc94f650f3f7f51981b5d8141f2dd8e21e0c8346
   branch: windows
   submodules: true
   specs:
