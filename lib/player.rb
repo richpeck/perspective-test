@@ -11,7 +11,7 @@ module Game # Game::Player
 
     ## Attr Readers ##
     ## Defines readable vars ##
-    attr_reader :fov_angle, :fov_length
+    attr_reader :fov, :fov_angle, :fov_length
       
     def initialize
 
@@ -124,37 +124,12 @@ module Game # Game::Player
 
     private 
 
-    # Rotation Matrix
-    # Method to return the rotation matrix (means we don't have to keep defining it each time)
-    def rotation_matrix radians
-      [
-        [Math.cos(radians), -(Math.sin(radians))],
-        [Math.sin(radians), Math.cos(radians)]
-      ]
-    end
-
-    # Matrix Multiply
-    # Code I found to multiply matrices together (used for rotation calculation code below)
-    def multiply_matrix(m1, m2)
-      result = Array.new( m1.length ) { Array.new( m2[0].length ) {0} }
-
-      for i in 0..result.length - 1
-          for j in 0..result[0].length - 1
-              for k in 0..m1[0].length - 1
-                  result[i][j] += m1[i][k] * m2[k][j]
-              end
-          end
-      end
-  
-      return result
-    end
-
     # Radians 
     # Functionality to update SINGLE set of points (p1[:x],p1[:y]) against static point (p2[:x],p2[:y])
     def update_radians p1, p2, angle_velocity = @angle_velocity
 
       # Vars
-      radians  = -(angle_velocity * (Math::PI / 180)) # this needs to be fixed (should NOT be negative)
+      radians  = -(angle_velocity * (Math::PI / 180)) # this needs to be fixed (should not be negative) -- this is because it's rotating anti-clockwise (figuring out the clockwise one)
       response = {}
 
       # Normalize lengths
@@ -162,7 +137,7 @@ module Game # Game::Player
       y2 = p1[:y] - p2[:y] # normalize y (IE take away the original line to provide the new position from 0,0)
 
       # Matrix
-      points = multiply_matrix([[x2, y2]], rotation_matrix(radians)) #-> should provide array with two values
+      points = Matrix.multiply([[x2, y2]], Matrix.rotation(radians)) #-> should provide array with two values
       points.flatten!
       
       # Response

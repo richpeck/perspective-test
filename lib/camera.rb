@@ -10,7 +10,7 @@ module Game # Game::Camera
 
   ## Points ##
   ## Used to give us a way to call Point.x when defining new items ##
-  Point = Struct.new(:x,:y, :z) do # https://stackoverflow.com/a/57148456/1143732
+  Vector = Struct.new(:x,:y,:z,:w) do # https://stackoverflow.com/a/57148456/1143732
     def initialize(*args) # https://stackoverflow.com/a/17061970 (MRUBY - error when compiling "keyword_init")
       opts = args.last.is_a?(Hash) ? args.pop : Hash.new
       super(*args)
@@ -24,14 +24,38 @@ module Game # Game::Camera
   ## This is the main camera object which renders our canvas ##
   class Camera
 
-    ## Other Constants ##
-    ## Used for things such as ceiling height ##
-    HEIGHT = 150 # height of the walls from the floor (considering the floor is 0)
-    FOV    = 350 # render distance
+    ################################
+    ################################
 
-    ## Attr Accessor ##
-    ## Editable from outside - allows us to make public methods that can be used by other parts of app ##
-    attr_accessor :walls
+    ## RPECK 11/01/2022
+    ## This is my attempt at creating a "camera" to visualize our worldview with perspective
+    ## I will briefly explain how it works here
+
+    ## 1. The world is defined with the various 2D elements in @map, @hud etc
+    ## 2. The player represents the camera (IE the player's co-ordinates are where the camera is located)
+    ## 3. When the player moves in worldspace, the camera needs to update its viewing plane, angle and height
+    ## 4. Once this has been done, it is able to take objects from the world and express them on screen using the Model > View > Projection set of matrices
+
+    ## First, we need to convert 2D lines into "walls" (3D objects defined by a series of points projected from the 2D)
+    ## Second, we need to use the MVP set of matrices to "project" the walls into model and view space
+    ## Third, we need to be able to turn these into projected planes
+
+    ################################
+    ################################
+
+    ## Constants ##
+    ## Values to use inside the Camera class ##
+    HEIGHT = 15
+
+    ################################
+    ################################
+
+    ## Attr Accessors ##
+    ## Values changeable publicly (IE @camera.direction)
+    #attr_accessor :direction
+
+    ################################
+    ################################
 
     ## Init ##
     ## Requires player, map & projectiles objects ##
@@ -42,9 +66,14 @@ module Game # Game::Camera
       @player = player 
       @map = map 
       @projectiles = projectiles
-      @original_walls = [] # populated later
       @walls = [] # populated later
-      @distance = 0 # populated later
+      @original_walls = [] # populated later
+
+      ## Perspective stuff ##
+      @fov_angle = @player.fov_angle
+      @aspect_ratio = BOUNDING_Y / BOUNDING_X
+      @zFar = @player.y - 150
+      @zNear = @player.y
 
       ## Locals ##
       ## Used for colours and other things ##
@@ -72,33 +101,49 @@ module Game # Game::Camera
       )
 
       ## Walls ##
-      ## Check if any walls exist, invoke them into the 3D worldview ##
+      ## Check if any walls exist, invoke them into 3D ##
       if @map.walls.any?
 
+        ## Test Line ##
+        ## This is the white line on the left of the screen - we are trying to render it as a wall in 3D space on the right ##
         line = Line.new(
           x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
           x2: (BOUNDING_X / 2), y2: (300 + 125),
-          size: 125,
           color: 'white',
           z: 10
         )
+
+        #################
+        ## Model Space ##
+        #################
+
+        ## The first step is to "normalize" the model -- which means taking a set of geometric values and usng them to create an object ##
+        ## For example, if you wanted to make a 2D square, you would require 4 points at [(-1,-1), (-1,1), (1,-1), (1,1)] ##
+
+        ## Because we have defined the line above, we can use the line's co-ordinates to create a geometric shape based on its model space ##
+        ## model = [[-x,-y,z], [-x,y,z], [x,-y,z], [x,y,z]] -> ALL NEED TO BE NORMALIZED AGAINST THE SHAPE ITSELF (NOT THE WORLDVIEW) ##
+        x_length = (line.x2 - line.x1) / 2.0
+        y_length = (line.y2 - line.y1) / 2.0 # 2.0 creates float
+
+        ## Model Matrix ##
+        ## This outputs a model matrix which we can populate with the points computed above (normalized around 0,0 inside the model) ##
+        model = Matrix.model(x_length, y_length, HEIGHT) # added "height" to help us compute the height of the object (considering the walls have the same height)
+
+        ################
+        ## View Space ##
+        ################
       
-        wall = []
-        wall[0] = Point.new(x: line.x1 + BOUNDING_X, y: line.y1)
-        wall[1] = Point.new(x: line.x2 + BOUNDING_X, y: line.y2)
-        wall[2] = Point.new(x: line.x1 + BOUNDING_X, y: line.y1 - HEIGHT)
-        wall[3] = Point.new(x: line.x2 + BOUNDING_X, y: line.y2 - HEIGHT)
-
-        @walls << Quad.new(
-          x1: wall[0].x, y1: wall[0].y, # white
-          x2: wall[2].x, y2: wall[2].y, # yellow
-          x3: wall[3].x, y3: wall[3].y, # green
-          x4: wall[1].x, y4: wall[1].y, # blue
-          color: ['blue', 'yellow' ,'green', 'white']
-        )
-
-        # Used to store the original wall points 
-        @original_walls << wall
+        ## The second step is to "normalize" the model against the camera (world space) ##
+        ## If the camera is at [0,0,0] and the model is positioned at [50,100,30], that means that we can apply the above model geometry to the view the camera creates ##
+        #camera = 
+      
+        # These are the new co-ordinates for the projected "3D" shapes
+        # We'll use these points to create a new Quad with the projected co-ordinates in the "update" method below
+        @walls[0] = []
+        @walls[0][0] = Vector.new(x: line.x1, y: 100, z: line.y1) # translate "y" from our 2D world to z and then reset the y co-ord to be 0 (ground) or HEIGHT (wall height)
+        @walls[0][1] = Vector.new(x: line.x2, y: 100, z: line.y2)
+        @walls[0][2] = Vector.new(x: line.x1, y: 100 + HEIGHT, z: line.y1)
+        @walls[0][3] = Vector.new(x: line.x2, y: 100 + HEIGHT, z: line.y2)
 
       end
 
@@ -108,91 +153,38 @@ module Game # Game::Camera
     ## Redraw the worldspace each time the player moves ##
     def update 
 
-      ## I think we need to work backwards from the user (IE what they will first see)
-      ## We can make this work by extending outwards from the user's X,Y co-ordinates
-      x = @player.x 
-      y = @player.y 
-
-      ## Projectiles ##
-      ## These have a definite set of dimensions etc so we can see how they look on screen
-      if @projectiles.any?
-
-        ## Determine distance from player
-        ## https://www.geeksforgeeks.org/program-calculate-distance-two-points/
-        @projectiles.select { |p|  p.x <= BOUNDING_X && p.y <= BOUNDING_Y }.each do |projectile|
-          a = (projectile.x - @player.x) ** 2
-          b = (projectile.y - @player.y) ** 2
-
-          distance = Math.sqrt((a + b) * 1.0)
-        end
-
-      end
-
       ## Walls ##
       ## Check if any walls exist, invoke them into the 3D worldview and then hide the ones that are not showing. Expensive AF but can be optimized another time ##
       if @walls.any?
 
-        ## Wall is a set of points which we have created from the lines drawn for the map ##
-        @walls.each_with_index do |wall,i|
+        ## Vars ##
+        new_wall = []
 
-          ## Central ##
-          central = Point.new(x: (@original_walls[i][0].x + @original_walls[i][1].x) / 2, y: (@original_walls[i][0].y + @original_walls[i][2].y) / 2)
+        ## Projection Matrix ##
+        projection_matrix = Matrix.projection(@fov_angle, @aspect_ratio, @zNear, @zFar)
 
-          ## Scale ##
-          scale = []
+        ## New Walls ##
+        @walls.each_with_index do |wall, i|
+          next unless i == 0
 
-          ## Points ##
+          ## Vars ##
+          new_wall[i] = []
+          
+          ## Create a new wall (this will be a quad which will populate the worldview) ##
+          ## For now, we just need to get the new points by multiplying by the matrix below ##
           (0..3).each do |p|
-
-            ## Distance ##
-            ## Get the distance from the player to that point specifically (in 3D) ##
-            a = Point.new(x: wall.send("x#{p + 1}"), y: wall.send("y#{p + 1}") + HEIGHT, z: wall.send("y#{p + 1}"))
-            b = Point.new(x: @player.x, y: @player.y, z: @player.y)
-  
-            ## Actual Distance ##
-            ## This allows us to now use this figure to calculate scale ##
-            dx = (a.x - b.x) ** 2
-            dy = (a.y - b.y) ** 2
-            dz = (a.z - b.z) ** 2
-            distance = Math.sqrt(dx + dy + dz)
-
-            ## Scale ##
-            scale[p] = (distance/@original_walls[i][p].y) / 0.1 # how far the user is in proportion to the object
-
+            #new_wall[i][p] = Matrix.multiply [[wall[p].x, wall[p].y, wall[p].z, 1]], projection_matrix # will return x,y,z value (ignore z because we don't need it for 2d)
           end
 
-          ## Wall is behind ##
-          if !scale.empty? && scale.all?(&:negative?)
-
-            ## Remove from worldview ##
-            #wall.remove
-
-          else
-
-            ## Add back into worldview ##
-            #wall.add
-
-            ## Update ##
-            wall.x1 = central.x + (@original_walls[i][0].x / scale[0]) #top right // blue
-            wall.y1 = central.y + (@original_walls[i][0].y / scale[0])
-          
-            wall.x2 = central.x + (@original_walls[i][2].x / scale[1]) #bottom left // yellow
-            wall.y2 = central.y - (@original_walls[i][2].y / scale[1])
-          
-            wall.x3 = central.x - (@original_walls[i][3].x / scale[2]) #bottom right // green
-            wall.y3 = central.y - (@original_walls[i][3].y / scale[2])
-          
-            wall.x4 = central.x - (@original_walls[i][1].x / scale[3]) #top left // white
-            wall.y4 = central.y + (@original_walls[i][1].y / scale[3])
-
-          end
+          # Probably need to fix this - there is an extra level of depth which is not required
+          #new_wall[i].flatten!(1)
 
         end
         
       end
 
     end 
-      
+
   end
 
 end

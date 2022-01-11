@@ -3,7 +3,7 @@ require 'ruby2d'
 
 # Objects
 if RUBY_ENGINE != 'mruby'
-    %w(player map projectile hud camera).each do |file|
+    %w(player map projectile hud camera matrix).each do |file|
         require_relative "lib/#{file}"
     end
 else
@@ -12,6 +12,7 @@ else
     require File.expand_path("../lib/projectile", __FILE__) 
     require File.expand_path("../lib/hud", __FILE__) 
     require File.expand_path("../lib/camera", __FILE__)
+    require File.expand_path("../lib/matrix", __FILE__)
 end
 
 # Constants
