@@ -34,10 +34,10 @@ class Matrix
   def self.model x_length, y_length, height = 0
     height /= 2.0
     [
-      [-(x_length), -(y_length) - height, 0],
-      [(-x_length), y_length - height, 0],
-      [x_length, -(y_length) + height, 0],
-      [x_length, y_length + height, 0]
+      [-(x_length), -(y_length) - height, 0, 1],
+      [(-x_length), y_length - height, 0, 1],
+      [x_length, -(y_length) + height, 0, 1],
+      [x_length, y_length + height, 0, 1]
     ]
   end
 
