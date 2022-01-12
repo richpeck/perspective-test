@@ -101,7 +101,7 @@ module Game # Game::Camera
           x2: w[1].x, y2: w[1].z + w[1].y,
           x3: w[2].x, y3: w[2].z + w[2].y,
           x4: w[3].x, y4: w[3].z + w[3].y,
-          color: 'teal',
+          color: [Color.new('teal'), Color.new('yellow'), Color.new('green'), Color.new('green')],
           z: 1
         )
         @quad.remove
@@ -154,24 +154,34 @@ module Game # Game::Camera
               ## Angle ##
               ## We need to translate this into the angle through which we'll see the point in our camera view (IE normalized against the camera) ##
               a = angle(normal, origin, point) # Gives us the angle away from the camera normal
-              b = angle_to_screen(a) # Gives us the screen X co-ordinate from said angle (we get Y co-ordinate from the scaling factor from the distance)
+              x = angle_to_screen(a) # Gives us the screen X co-ordinate from said angle (we get Y co-ordinate from the scaling factor from the distance)
 
               ## Height ##
-              ## Now we need to figure out the height of the point on the screen
+              ## Now we need to figure out the height of the point on the screen (relative to the total screen height)
+              y = distance_to_height(d) ## returns height values tp be used for top; bottom will deduct this value
 
+              ## The h value gives us the ability to calculate where on the Y axis the points should be placed ##
+              ## For example, if we have a point that has an h value of 0.93 (93%) - we remove this from the entire BOUNDING_Y number (IE 0.07), calculate the value and split it in two ((1 - c) * BOUNDING_Y))/2 -- this gives us the amount of height we need to reduce from the top + bottom of the points  ##
 
-              
               if p == 1 
-                wall.send("x#{p}=", b)
-                wall.x2 = b
+                wall.x1 = x
+                wall.x2 = x
+
+                wall.y2 = BOUNDING_Y - y
+                wall.y1 = y
+
               elsif p == 2
-                wall.x3 = b
-                wall.x4 = b
+                wall.x3 = x
+                wall.y3 = BOUNDING_Y - y 
+
+                wall.x4 = x
+                wall.y4 = y
               end
 
             end
             
             ## Add back into the DOM ##
+            #wall.color = [Color.new('yellow'), Color.new('yellow'), Color.new('yellow'), Color.new('yellow')]
             wall.add
 
           else
@@ -192,6 +202,19 @@ module Game # Game::Camera
     ## Get 2D distance between camera and point (all distances done in 2D because we just want to spoof them for 3D) ##
     def distance x1, y1, x2, y2 
       Math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2) * 1.0)
+    end
+
+    ## Distance → Height ##
+    ## Takes the distance of the point from the camera and uses a scaling function to provide height that can be used to determine the Y co-ordinate ##
+    def distance_to_height distance 
+
+      ## We need to convert the distance to the point into an equivalent height (porportional to the screen (EG 90%)) ##
+      ## To do this, we take the raw distance to the point and convert it into decimal format ##
+      ## https://youtu.be/xW8skO7MFYw?t=833 ##
+      ceiling = (BOUNDING_Y / 2.0) - (BOUNDING_Y / distance)
+
+
+
     end
 
     ## Angle ##
@@ -226,14 +249,6 @@ module Game # Game::Camera
       ## Co-Ordinate ##
       ## The "X" co-ordinate for the point should then be the column width multiplied by the column number (EG 8.33 * 15) ##
       return (column_width * column) + BOUNDING_X ## BOUNDING_X added to provide to offset worldview
-
-    end
-
-    ## Distance → Height ##
-    ## Takes the distance of the point from the camera and uses a scaling function to provide height that can be used to determine the Y co-ordinate ##
-    def distance_to_height distance 
-
-
 
     end
 
