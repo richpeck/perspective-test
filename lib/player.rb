@@ -11,7 +11,10 @@ module Game # Game::Player
 
     ## Attr Readers ##
     ## Defines readable vars ##
-    attr_reader :fov, :fov_angle, :fov_length
+    attr_reader :line, :fov, :fov_angle, :fov_length
+
+    ## Constants ##
+    Z = 10
       
     def initialize
 
@@ -26,7 +29,7 @@ module Game # Game::Player
       @dot = Square.new(
         size: 5,
         color: 'red',
-        z: 1
+        z: Z
       )
       @dot.x = (BOUNDING_X - @dot.size) / 2
       @dot.y = (BOUNDING_Y - @dot.size) - 10
@@ -37,7 +40,7 @@ module Game # Game::Player
         x2: @dot.x + 3, y2: @dot.y - 35,
         width: @dot.size,
         color: 'silver',
-        z: 0,
+        z: Z,
         opacity: 0.2
       )
 
@@ -51,7 +54,7 @@ module Game # Game::Player
         x3: point_3[:x], y3: point_3[:y],
         x4: point_4[:x], y4: point_4[:y],
         color: 'aqua',
-        z: 10,
+        z: Z,
         opacity: 0.025
       )
 

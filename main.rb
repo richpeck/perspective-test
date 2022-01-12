@@ -26,6 +26,15 @@ HEIGHT   = 550
 # Set title, dimensions etc
 set title: "Perspective Test", background: 'black', width: WIDTH, height: HEIGHT
 
+# Background
+# This is used to give us a black background to hide the overflow from the camera. Yes, it's a hack but wanted to get it done quickly
+Rectangle.new(
+    x: 0, y: 0,
+    width: WIDTH/2, height: HEIGHT,
+    color: 'black',
+    z: 5
+)
+
 # Objects 
 # Loaded at start so they provide the engine with the means to calculate the entire experience
 @player      = Game::Player.new      # player animation in the center of the screen

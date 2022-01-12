@@ -5,6 +5,9 @@ module Game # Game::HUD
 
   class HUD
 
+    # Constants 
+    Z = 100 # stay on top
+
     # Attrs 
     attr_reader :projectiles, :player
       
@@ -13,10 +16,10 @@ module Game # Game::HUD
       @projectiles = projectiles || []
       @player      = player
 
-      @projectiles_message = Text.new("Projectiles: #{@projectiles.size}", x: 20, y: 20)
-      @angle_message       = Text.new("Angle: #{@player.angle}", x: 20, y: 45)
-      @x_message           = Text.new("X: #{@player.x}", x: 20, y: 70)
-      @y_message           = Text.new("Y: #{@player.y}", x: 20, y: 95)
+      @projectiles_message = Text.new("Projectiles: #{@projectiles.size}", x: 20, y: 20, z: Z)
+      @angle_message       = Text.new("Angle: #{@player.angle}", x: 20, y: 45, z: Z)
+      @x_message           = Text.new("X: #{@player.x}", x: 20, y: 70, z: Z)
+      @y_message           = Text.new("Y: #{@player.y}", x: 20, y: 95, z: Z)
     end
 
     # Update

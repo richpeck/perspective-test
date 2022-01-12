@@ -28,33 +28,15 @@ class Matrix
     ]
   end
 
-  ## Model Matrix ##
-  ## Used to give us a set of points which can be used to compute geometry ##
-  ## output = [[-x,-y,z], [-x,y,z], [x,-y,z], [x,y,z]] ##
-  def self.model x_length, y_length, height = 0
-    height /= 2.0
-    [
-      [-(x_length), -(y_length) - height, 0, 1],
-      [(-x_length), y_length - height, 0, 1],
-      [x_length, -(y_length) + height, 0, 1],
-      [x_length, y_length + height, 0, 1]
-    ]
-  end
-
   ## Projection Matrix ##
   ## This is used to project a set of 3D points into 2D ##
   ## https://youtu.be/EqNcqBdrNyI?t=1403
   def self.projection fov_angle, aspect_ratio, znear, zfar
-    #[
-    #  [aspect_ratio * (1 / Math.tan(fov_angle / 2)), 0, 0, 0],
-    #  [0, 1 / Math.tan(fov_angle / 2), 0, 0],
-    #  [0, 0, zfar / (zfar - znear), (-zfar * znear) / (zfar - znear)],
-    #  [0, 0, 1, 0]
-    #]
     [
-      [1, 0, 0],
-      [0, 1, 0],
-      [0, 0, 0],
+      [aspect_ratio * (1 / Math.tan(fov_angle / 2)), 0, 0, 0],
+      [0, 1 / Math.tan(fov_angle / 2), 0, 0],
+      [0, 0, zfar / (zfar - znear), (-zfar * znear) / (zfar - znear)],
+      [0, 0, 1, 0]
     ]
   end
 
