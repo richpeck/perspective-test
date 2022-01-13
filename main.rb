@@ -1,6 +1,22 @@
 # Libraries
 require 'ruby2d'
 
+#######################################
+#######################################
+
+## IMPORTANT ##
+
+## Requires SDL2_TTF 2.0.15-1 to be installed
+## You can download from the repo here: http://repo.msys2.org/mingw/mingw64/
+
+## 1. Save this locally: http://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-SDL2_ttf-2.0.15-1-any.pkg.tar.xz
+## 2. Load up MSYS2 and uninstall any version of SDL2_TTF that's later than 2.0.15
+## 3. Type pacman -U c:/users/richard/downloads/mingw-w64-x86_64-SDL2_ttf-2.0.15-1-any.pkg.tar.xz to install the local file
+## 4. It should load and all should be well
+
+#######################################
+#######################################
+
 # Objects
 if RUBY_ENGINE != 'mruby'
     %w(player map projectile hud camera matrix).each do |file|

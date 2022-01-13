@@ -119,13 +119,19 @@ module Game # Game::Camera
       if @walls.any?
 
         ## Vars ##
-        visible_walls = []
-        projection_matrix = Matrix.projection(@player.angle, BOUNDING_X/BOUNDING_Y, 10, 100)
+        visible_walls, points = [],[]
+
+        points[0] = Vector.new(x: @player.fov.x1, y: @player.fov.y1)
+        points[1] = Vector.new(x: @player.fov.x2, y: @player.fov.y2)
+        points[2] = Vector.new(x: @player.fov.x3, y: @player.fov.y3)
 
         ## Walls ##
         @walls.each_with_index do |wall, i|
           next unless i == 0 #debug mode
-          (1..2).each { |p| visible_walls << i if @player.fov.contains?(wall.send("x#{p}"), wall.send("y#{p}")) } # using the 2D line so only need 1..2
+          (1..2).each do |p|
+            points[3] = Vector.new(wall.send("x#{p}"), wall.send("y#{p}"))
+            visible_walls << i if inside?(points[3], points[0], points[1], points[2]) # using the 2D line so only need 1..2
+          end
         end
 
         ## Visisble Walls ##
@@ -198,6 +204,21 @@ module Game # Game::Camera
 
     private 
 
+    ## Inside? ##
+    ## Is the point inside the FOV triangle? ##
+    ## http://jsfiddle.net/PerroAZUL/zdaY8/1/ & https://stackoverflow.com/a/20861130/1143732 ##
+    def inside? p, p0, p1, p2
+
+        s = (p0.x - p2.x) * (p.y - p2.y) - (p0.y - p2.y) * (p.x - p2.x)
+        t = (p1.x - p0.x) * (p.y - p0.y) - (p1.y - p0.y) * (p.x - p0.x)
+    
+        return false if ((s < 0) != (t < 0) && s != 0 && t != 0)
+    
+        d = (p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x)
+        return d == 0 || (d < 0) == (s + t <= 0)
+      
+    end
+
     ## Distance ##
     ## Get 2D distance between camera and point (all distances done in 2D because we just want to spoof them for 3D) ##
     def distance x1, y1, x2, y2 
@@ -212,8 +233,6 @@ module Game # Game::Camera
       ## To do this, we take the raw distance to the point and convert it into decimal format ##
       ## https://youtu.be/xW8skO7MFYw?t=833 ##
       ceiling = (BOUNDING_Y / 2.0) - (BOUNDING_Y / distance)
-
-
 
     end
 
