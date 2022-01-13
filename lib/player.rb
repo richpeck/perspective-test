@@ -48,14 +48,13 @@ module Game # Game::Player
       point_3 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 - (@fov_angle/2)) % 360)
       point_4 = update_radians({ x: @dot.x, y: @dot.y - fov_length }, { x: @dot.x, y: @dot.y }, (0 + (@fov_angle/2)) % 360)
 
-      @fov = Quad.new(
+      @fov = Triangle.new(
         x1: @dot.x, y1: @dot.y,
-        x2: @dot.x, y2: @dot.y,
-        x3: point_3[:x], y3: point_3[:y],
-        x4: point_4[:x], y4: point_4[:y],
+        x2: point_3[:x], y3: point_3[:y],
+        x3: point_4[:x], y4: point_4[:y],
         color: 'aqua',
         z: Z,
-        opacity: 0.025
+        opacity: 0.1
       )
 
       # x,y
@@ -78,7 +77,7 @@ module Game # Game::Player
 
     # Update FoV
     def update_fov 
-      [3,4].each do |i|
+      [2,3].each do |i|
         angles = update_radians({ x: @fov.send("x#{i}"), y: @fov.send("y#{i}") }, { x: @fov.x1, y: @fov.y1 })
 
         @fov.send("x#{i}=", angles[:x])
@@ -102,7 +101,6 @@ module Game # Game::Player
           @fov.x1 += x 
           @fov.x2 += x 
           @fov.x3 += x 
-          @fov.x4 += x
         end
       end 
 
@@ -115,7 +113,6 @@ module Game # Game::Player
           @fov.y1 -= y 
           @fov.y2 -= y 
           @fov.y3 -= y 
-          @fov.y4 -= y
         end
       end 
 
