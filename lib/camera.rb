@@ -31,7 +31,11 @@ module Game # Game::Camera
     ## Values to use inside the Camera class ##
     HEIGHT = 15
     PLAYER = 5
-    Z      = 0
+    COLOUR = '#2b1cff'
+    BACKGROUND = 'red'
+    FLOOR_FORE = '#383838'
+    FLOOR_BACK = 'black'
+    Z = 0 #-> z-index used for camera overlap/clipping
 
     ################################
     ################################
@@ -60,7 +64,7 @@ module Game # Game::Camera
         x2: Window.width, y2: 0,
         x3: Window.width, y3: BOUNDING_Y,
         x4: BOUNDING_X, y4: BOUNDING_Y,
-        color: background,
+        color: BACKGROUND,
         z: Z
       )
 
@@ -71,7 +75,7 @@ module Game # Game::Camera
         x2: Window.width, y2: (BOUNDING_Y / 2),
         x3: Window.width, y3: BOUNDING_Y,
         x4: BOUNDING_X, y4: BOUNDING_Y,
-        color: [background, background, floor, floor],
+        color: [FLOOR_BACK, FLOOR_BACK, FLOOR_FORE, FLOOR_FORE],
         z: Z + 1
       )
 
@@ -79,32 +83,45 @@ module Game # Game::Camera
       ## Check if any walls exist, invoke them into 3D ##
       if @map.walls.any?
 
-        ## Test Line ##
+        ## Walls ##
         ## This is the white line on the left of the screen - we are trying to render it as a wall in 3D space on the right ##
-        @walls << Line.new(
-          x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
-          x2: (BOUNDING_X / 2), y2: (300 + 125),
-          color: 'white',
-          z: 10
-        )
-      
+        @map.walls.each do |wall|
+          line = Line.new(
+            x1: wall.x2, y1: wall.y1,
+            x2: wall.x2, y2: wall.y2,
+            z: 10
+          )
+          line.remove
+          @walls << line
+        end
+
+        #@walls << Line.new(
+        #  x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
+        #  x2: (BOUNDING_X / 2), y2: (300 + 125),
+        #  color: 'white',
+        #  z: 10
+        #)
+
         # These are the new co-ordinates for the projected "3D" shapes
         # We'll use these points to create a new Quad with the projected co-ordinates in the "update" method below
-        w =[]
-        w[0] = Vector.new(x: @walls[0].x1, y: 0, z: @walls[0].y1)
-        w[1] = Vector.new(x: @walls[0].x1, y: 0 + HEIGHT, z: @walls[0].y1)
-        w[2] = Vector.new(x: @walls[0].x2, y: 0 + HEIGHT, z: @walls[0].y2)
-        w[3] = Vector.new(x: @walls[0].x2, y: 0, z: @walls[0].y2)
+        @walls.each do |wall|
 
-        @projected_walls << @quad = Quad.new(
-          x1: w[0].x, y1: w[0].z + w[0].y,
-          x2: w[1].x, y2: w[1].z + w[1].y,
-          x3: w[2].x, y3: w[2].z + w[2].y,
-          x4: w[3].x, y4: w[3].z + w[3].y,
-          color: [Color.new('teal'), Color.new('yellow'), Color.new('green'), Color.new('green')],
-          z: 1
-        )
-        @quad.remove
+          w = []
+          w[0] = Vector.new(x: wall.x1, y: 0, z: wall.y1)
+          w[1] = Vector.new(x: wall.x1, y: 0 + HEIGHT, z: wall.y1)
+          w[2] = Vector.new(x: wall.x2, y: 0 + HEIGHT, z: wall.y2)
+          w[3] = Vector.new(x: wall.x2, y: 0, z: wall.y2)
+
+          @projected_walls << @quad = Quad.new(
+            x1: w[0].x, y1: w[0].z + w[0].y,
+            x2: w[1].x, y2: w[1].z + w[1].y,
+            x3: w[2].x, y3: w[2].z + w[2].y,
+            x4: w[3].x, y4: w[3].z + w[3].y,
+            z: 1
+          )
+          @quad.remove
+
+        end
 
       end
 
@@ -119,7 +136,7 @@ module Game # Game::Camera
       if @walls.any?
 
         ## Vars ##
-        visible_walls, points = [],[]
+        visible_walls, points, colours = [],[],[]
 
         points[0] = Vector.new(x: @player.fov.x1, y: @player.fov.y1)
         points[1] = Vector.new(x: @player.fov.x2, y: @player.fov.y2)
@@ -127,7 +144,6 @@ module Game # Game::Camera
 
         ## Walls ##
         @walls.each_with_index do |wall, i|
-          next unless i == 0 #debug mode
           (1..2).each do |p|
             points[3] = Vector.new(wall.send("x#{p}"), wall.send("y#{p}"))
             visible_walls << i if inside?(points[3], points[0], points[1], points[2]) # using the 2D line so only need 1..2
@@ -159,35 +175,51 @@ module Game # Game::Camera
 
               ## Angle ##
               ## We need to translate this into the angle through which we'll see the point in our camera view (IE normalized against the camera) ##
-              a = angle(normal, origin, point) # Gives us the angle away from the camera normal
+              a = -(angle(normal, origin, point)) # Gives us the angle away from the camera normal
               x = angle_to_screen(a) # Gives us the screen X co-ordinate from said angle (we get Y co-ordinate from the scaling factor from the distance)
 
               ## Height ##
               ## Now we need to figure out the height of the point on the screen (relative to the total screen height)
               y = distance_to_height(d) ## returns height values tp be used for top; bottom will deduct this value
 
-              ## The h value gives us the ability to calculate where on the Y axis the points should be placed ##
-              ## For example, if we have a point that has an h value of 0.93 (93%) - we remove this from the entire BOUNDING_Y number (IE 0.07), calculate the value and split it in two ((1 - c) * BOUNDING_Y))/2 -- this gives us the amount of height we need to reduce from the top + bottom of the points  ##
+              ## Colour ##
+              ## This allows us to change the colour depending on the distance ##
+              distance_percentage = (BOUNDING_Y - d)/BOUNDING_Y
 
-              if p == 1 
-                wall.x1 = x
-                wall.x2 = x
+              ## Darkened ##
+              ## Gives us the ability to darken a particular part of the wall's colour ##
+              colour = darken_color(COLOUR, distance_percentage)
 
-                wall.y2 = BOUNDING_Y - y
-                wall.y1 = y
+              ## Populate the x/y values for the wall ##
+              case p 
+                when 1 
+                  wall.x1 = x
+                  wall.x2 = x
 
-              elsif p == 2
-                wall.x3 = x
-                wall.y3 = BOUNDING_Y - y 
+                  wall.y2 = BOUNDING_Y - y
+                  wall.y1 = y
 
-                wall.x4 = x
-                wall.y4 = y
+                  colour = Color.new(colour)
+                  colours[0] = colour
+                  colours[1] = colour 
+                when 2
+                  wall.x3 = x
+                  wall.y3 = BOUNDING_Y - y 
+
+                  wall.x4 = x
+                  wall.y4 = y
+
+                  colour = Color.new(colour)
+                  colours[2] = colour 
+                  colours[3] = colour
               end
 
             end
+
+            ## Add Colours ##
+            wall.color = colours if colours.size == 4
             
             ## Add back into the DOM ##
-            #wall.color = [Color.new('yellow'), Color.new('yellow'), Color.new('yellow'), Color.new('yellow')]
             wall.add
 
           else
@@ -209,13 +241,13 @@ module Game # Game::Camera
     ## http://jsfiddle.net/PerroAZUL/zdaY8/1/ & https://stackoverflow.com/a/20861130/1143732 ##
     def inside? p, p0, p1, p2
 
-        s = (p0.x - p2.x) * (p.y - p2.y) - (p0.y - p2.y) * (p.x - p2.x)
-        t = (p1.x - p0.x) * (p.y - p0.y) - (p1.y - p0.y) * (p.x - p0.x)
-    
-        return false if ((s < 0) != (t < 0) && s != 0 && t != 0)
-    
-        d = (p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x)
-        return d == 0 || (d < 0) == (s + t <= 0)
+      s = (p0.x - p2.x) * (p.y - p2.y) - (p0.y - p2.y) * (p.x - p2.x)
+      t = (p1.x - p0.x) * (p.y - p0.y) - (p1.y - p0.y) * (p.x - p0.x)
+  
+      return false if ((s < 0) != (t < 0) && s != 0 && t != 0)
+  
+      d = (p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x)
+      return d == 0 || (d < 0) == (s + t <= 0)
       
     end
 
@@ -233,6 +265,7 @@ module Game # Game::Camera
       ## To do this, we take the raw distance to the point and convert it into decimal format ##
       ## https://youtu.be/xW8skO7MFYw?t=833 ##
       ceiling = (BOUNDING_Y / 2.0) - (BOUNDING_Y / distance)
+
 
     end
 
@@ -269,6 +302,18 @@ module Game # Game::Camera
       ## The "X" co-ordinate for the point should then be the column width multiplied by the column number (EG 8.33 * 15) ##
       return (column_width * column) + BOUNDING_X ## BOUNDING_X added to provide to offset worldview
 
+    end
+
+    ## Colour Manipulation (Darken) ##
+    ## Amount should be a decimal between 0 and 1. Lower means darker
+    ## https://www.redguava.com.au/2011/10/lighten-or-darken-a-hexadecimal-color-in-ruby-on-rails/
+    def darken_color(hex_color, amount=0.4)
+      hex_color = hex_color.gsub('#','')
+      rgb = hex_color.scan(/../).map {|color| color.hex}
+      rgb[0] = (rgb[0].to_i * amount).round
+      rgb[1] = (rgb[1].to_i * amount).round
+      rgb[2] = (rgb[2].to_i * amount).round
+      "#%02x%02x%02x" % rgb
     end
 
   end

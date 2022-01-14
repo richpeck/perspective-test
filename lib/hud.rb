@@ -21,10 +21,7 @@ module Game # Game::HUD
       @x_message           = Text.new("X: #{@player.x}", x: 20, y: 70, z: Z)
       @y_message           = Text.new("Y: #{@player.y}", x: 20, y: 95, z: Z)
 
-      @projectiles_size = @projectiles.size
-      @angle = @player.angle 
-      @x = @player.x 
-      @y = @player.y 
+      update_info
     end
 
     # Update
@@ -36,6 +33,16 @@ module Game # Game::HUD
       @x_message.text = "X: #{@player.x.to_s}" if @x != @player.x
       @y_message.text = "Y: #{@player.y.to_s}" if @y != @player.y 
 
+      @projectiles_size = @projectiles.size
+      @angle = @player.angle 
+      @x = @player.x 
+      @y = @player.y 
+    end
+
+    private 
+
+    # Update Info 
+    def update_info 
       @projectiles_size = @projectiles.size
       @angle = @player.angle 
       @x = @player.x 
