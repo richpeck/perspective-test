@@ -5,6 +5,9 @@ module Game # Game::Map
 
   class Map
 
+    # Constants 
+    Z = 1000
+
     # Attributes
     attr_accessor :walls, :door
       
@@ -17,48 +20,69 @@ module Game # Game::Map
 
       # Initial Walls 
       # This is just a test to see if we can do collision code
-      @walls.push Line.new(
-        x1: 125, y1: 100,
-        x2: 125, y2: 400,
-        width: 2,
-        color: 'yellow',
-        z: 20
-      )
+      #@walls.push Line.new(
+      #  x1: 125, y1: 100,
+      #  x2: 125, y2: 400,
+      #  width: 2,
+      #  color: 'yellow',
+      #  z: 20
+      #)
 
       # 1
-      @walls.push Line.new(
-        x1: 125, y1: 100,
-        x2: 350, y2: 400,
-        width: 2,
-        color: 'yellow',
-        z: 20
-      )
+      #@walls.push Line.new(
+      #  x1: 125, y1: 100,
+      #  x2: 350, y2: 400,
+      #  width: 2,
+      #  color: 'yellow',
+      #  z: 20
+      #)
 
       #2 
-      @walls.push Line.new(
-        x1: 125, y1: 400,
-        x2: 150, y2: 400,
-        width: 2,
-        color: 'yellow',
-        z: 20
-      )
+      #@walls.push Line.new(
+      #  x1: 125, y1: 400,
+      #  x2: 150, y2: 400,
+      #  width: 2,
+      #  color: 'yellow',
+      #  z: 20
+      #)
 
       #3 
-      @walls.push Line.new(
-        x1: 350, y1: 400,
-        x2: 200, y2: 400,
-        width: 2,
-        color: 'yellow',
-        z: 20
-      )
+      #@walls.push Line.new(
+      #  x1: 350, y1: 400,
+      #  x2: 200, y2: 400,
+      #  width: 2,
+      #  color: 'yellow',
+      #  z: 20
+      #)
 
       # Door 
-      @doors.push Line.new(
-        x1: 150, y1: 400,
-        x2: 200, y2: 400,
-        width: 2,
-        color: 'lime',
-        z: 19
+      #@doors.push Line.new(
+      #  x1: 150, y1: 400,
+      #  x2: 200, y2: 400,
+      #  width: 2,
+      #  color: 'lime',
+      #  z: 19
+      #)
+      
+      @walls << Line.new(
+        x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
+        x2: (BOUNDING_X / 2), y2: (300 + 125),
+        color: 'white',
+        z: Z
+      )
+
+      @walls.push Line.new(
+        x1: (BOUNDING_X / 2) - 100, y1: (BOUNDING_Y / 2) - 50,
+        x2: (BOUNDING_X / 2) + 100, y2: (BOUNDING_Y / 2) - 50,
+        color: 'white',
+        z: Z
+      )
+
+      @walls.push Line.new(
+        x1: (BOUNDING_X / 2) - 10, y1: (BOUNDING_Y / 2) + 50,
+        x2: (BOUNDING_X / 2) + 10, y2: (BOUNDING_Y / 2) + 50,
+        color: 'white',
+        z: Z
       )
 
     end

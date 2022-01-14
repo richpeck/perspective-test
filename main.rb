@@ -48,7 +48,7 @@ Rectangle.new(
     x: 0, y: 0,
     width: WIDTH/2, height: HEIGHT,
     color: 'black',
-    z: 5
+    z: 1000
 )
 
 # Objects 

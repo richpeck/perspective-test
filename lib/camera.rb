@@ -29,7 +29,7 @@ module Game # Game::Camera
 
     ## Constants ##
     ## Values to use inside the Camera class ##
-    HEIGHT = 15
+    HEIGHT = 30
     PLAYER = 5
     COLOUR = '#2b1cff'
     BACKGROUND = 'red'
@@ -85,29 +85,15 @@ module Game # Game::Camera
 
         ## Walls ##
         ## This is the white line on the left of the screen - we are trying to render it as a wall in 3D space on the right ##
-        #@map.walls.each do |wall|
-        #  line = Line.new(
-        #    x1: wall.x2, y1: wall.y1,
-        #    x2: wall.x2, y2: wall.y2,
-        #    z: 10
-        #  )
-        #  line.remove
-        #  @walls << line
-        #end
-
-        @walls << Line.new(
-          x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
-          x2: (BOUNDING_X / 2), y2: (300 + 125),
-          color: 'white',
-          z: 10
-        )
-
-        @walls << Line.new(
-          x1: (BOUNDING_X / 2) - 100, y1: (350 + 125),
-          x2: (BOUNDING_X / 2), y2: (350 + 125),
-          color: 'white',
-          z: 10
-        )
+        @map.walls.each do |wall|
+          line = Line.new(
+            x1: BOUNDING_X + wall.x1, y1: BOUNDING_X + wall.y1,
+            x2: wall.x2, y2: wall.y2,
+            z: 10
+          )
+          line.remove
+          @walls << line
+        end
 
         # These are the new co-ordinates for the projected "3D" shapes
         # We'll use these points to create a new Quad with the projected co-ordinates in the "update" method below
@@ -221,6 +207,9 @@ module Game # Game::Camera
                   colours[3] = colour
               end
 
+              ## Z Buffer ##
+              wall.z = 15 + (-(d) / 100).truncate if p == 2
+
             end
 
             ## Add Colours ##
@@ -271,7 +260,7 @@ module Game # Game::Camera
       ## We need to convert the distance to the point into an equivalent height (porportional to the screen (EG 90%)) ##
       ## To do this, we take the raw distance to the point and convert it into decimal format ##
       ## https://youtu.be/xW8skO7MFYw?t=833 ##
-      ceiling = (BOUNDING_Y / 2.0) - (BOUNDING_Y / distance)
+      (BOUNDING_Y / 2.0) - ((BOUNDING_Y / distance) + HEIGHT)
 
 
     end
@@ -317,9 +306,9 @@ module Game # Game::Camera
     def darken_color(hex_color, amount=0.4)
       hex_color = hex_color.gsub('#','')
       rgb =[]
-      rgb[0] = (hex_color[0..1].hex.to_i * amount).round
-      rgb[1] = (hex_color[2..3].hex.to_i * amount).round
-      rgb[2] = (hex_color[4..5].hex.to_i * amount).round
+      rgb[0] = (hex_color[0..1].hex.to_i * amount.abs).round
+      rgb[1] = (hex_color[2..3].hex.to_i * amount.abs).round
+      rgb[2] = (hex_color[4..5].hex.to_i * amount.abs).round
       "#%02x%02x%02x" % rgb
     end
 

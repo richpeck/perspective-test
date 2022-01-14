@@ -28,16 +28,4 @@ class Matrix
     ]
   end
 
-  ## Projection Matrix ##
-  ## This is used to project a set of 3D points into 2D ##
-  ## https://youtu.be/EqNcqBdrNyI?t=1403
-  def self.projection fov_angle, aspect_ratio, znear, zfar
-    [
-      [aspect_ratio * (1 / Math.tan(fov_angle / 2)), 0, 0, 0],
-      [0, 1 / Math.tan(fov_angle / 2), 0, 0],
-      [0, 0, zfar / (zfar - znear), (-zfar * znear) / (zfar - znear)],
-      [0, 0, 1, 0]
-    ]
-  end
-
 end

@@ -14,7 +14,7 @@ module Game # Game::Player
     attr_reader :line, :fov, :fov_angle, :fov_length
 
     ## Constants ##
-    Z = 10
+    Z = 1000
       
     def initialize
 
@@ -54,7 +54,7 @@ module Game # Game::Player
         x3: point_4[:x], y4: point_4[:y],
         color: 'aqua',
         z: Z,
-        opacity: 0.1
+        opacity: 0.05
       )
 
       # x,y

@@ -6,7 +6,7 @@ module Game # Game::HUD
   class HUD
 
     # Constants 
-    Z = 100 # stay on top
+    Z = 9999 # stay on top
 
     # Attrs 
     attr_reader :projectiles, :player
