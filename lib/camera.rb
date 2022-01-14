@@ -85,22 +85,29 @@ module Game # Game::Camera
 
         ## Walls ##
         ## This is the white line on the left of the screen - we are trying to render it as a wall in 3D space on the right ##
-        @map.walls.each do |wall|
-          line = Line.new(
-            x1: wall.x2, y1: wall.y1,
-            x2: wall.x2, y2: wall.y2,
-            z: 10
-          )
-          line.remove
-          @walls << line
-        end
+        #@map.walls.each do |wall|
+        #  line = Line.new(
+        #    x1: wall.x2, y1: wall.y1,
+        #    x2: wall.x2, y2: wall.y2,
+        #    z: 10
+        #  )
+        #  line.remove
+        #  @walls << line
+        #end
 
-        #@walls << Line.new(
-        #  x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
-        #  x2: (BOUNDING_X / 2), y2: (300 + 125),
-        #  color: 'white',
-        #  z: 10
-        #)
+        @walls << Line.new(
+          x1: (BOUNDING_X / 2) - 100, y1: (300 + 125),
+          x2: (BOUNDING_X / 2), y2: (300 + 125),
+          color: 'white',
+          z: 10
+        )
+
+        @walls << Line.new(
+          x1: (BOUNDING_X / 2) - 100, y1: (350 + 125),
+          x2: (BOUNDING_X / 2), y2: (350 + 125),
+          color: 'white',
+          z: 10
+        )
 
         # These are the new co-ordinates for the projected "3D" shapes
         # We'll use these points to create a new Quad with the projected co-ordinates in the "update" method below
@@ -309,10 +316,10 @@ module Game # Game::Camera
     ## https://www.redguava.com.au/2011/10/lighten-or-darken-a-hexadecimal-color-in-ruby-on-rails/
     def darken_color(hex_color, amount=0.4)
       hex_color = hex_color.gsub('#','')
-      rgb = hex_color.scan(/../).map {|color| color.hex}
-      rgb[0] = (rgb[0].to_i * amount).round
-      rgb[1] = (rgb[1].to_i * amount).round
-      rgb[2] = (rgb[2].to_i * amount).round
+      rgb =[]
+      rgb[0] = (hex_color[0..1].hex.to_i * amount).round
+      rgb[1] = (hex_color[2..3].hex.to_i * amount).round
+      rgb[2] = (hex_color[4..5].hex.to_i * amount).round
       "#%02x%02x%02x" % rgb
     end
 
